@@ -1,0 +1,12 @@
+# Misc
+.idea
+venv/*
+config.json
+prev_players.json
+.DS_Store
+
+# Testing
+test.py
+
+# Build
+__pycache__/
