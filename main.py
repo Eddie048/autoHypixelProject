@@ -8,7 +8,7 @@ from PIL import Image
 from image_reader import ImageReader
 import player_util
 
-config = None
+config = {}
 
 
 # takes in an image, returns a list of the lines of text in the image
@@ -189,7 +189,6 @@ def get_latest_image(directory):
 
 
 def callback():
-
     recent_image = get_latest_image(config["screenshots_directory"])
     username_list = get_text_from_image(recent_image)
     do_threat_analysis(username_list, config["api_key"], config["ignored_usernames"])
