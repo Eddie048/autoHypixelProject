@@ -1,9 +1,9 @@
 import os
 import json
+import pathlib
 import sys
 from fswatch import Monitor
 from PIL import Image
-import pathlib
 
 from image_reader import ImageReader
 import player_util
@@ -188,7 +188,7 @@ def get_latest_image(directory):
     return directory + latest_image
 
 
-def callback(path, evt_time, flags, flags_num, event_num):
+def callback():
 
     recent_image = get_latest_image(config["screenshots_directory"])
     username_list = get_text_from_image(recent_image)
