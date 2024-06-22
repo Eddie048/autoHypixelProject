@@ -42,7 +42,7 @@ def get_info(player_name, key):
     if "final_deaths_bedwars" not in raw_data or raw_data["final_deaths_bedwars"] == 0:
         player_data["FKDR"] = 0
     else:
-        player_data["FKDR"] =  round(10 * player_data["Finals"] / raw_data["final_deaths_bedwars"])/10
+        player_data["FKDR"] = round(10 * player_data["Finals"] / raw_data["final_deaths_bedwars"]) / 10
 
     # Get winstreak data
     player_data["Winstreak"] = raw_data["winstreak"] if "winstreak" in raw_data else 0
