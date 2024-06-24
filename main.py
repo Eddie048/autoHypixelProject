@@ -209,9 +209,13 @@ class Handler(FileSystemEventHandler):
 
 
 def main():
-    # read the config file into memory
-    with open(str(os.path.dirname(os.path.abspath(__file__))) + '/config.json') as f:
-        data = f.read()
+    data = None
+    # Ensure confiig file exists, read the config file into memory
+    try:
+        with open(str(os.path.dirname(os.path.abspath(__file__))) + '/config.json') as f:
+            data = f.read()
+    except FileNotFoundError:
+        print("config.json file not found. Create a config.json file to continue")
 
     global config
     config = json.loads(data)
