@@ -93,18 +93,15 @@ def do_threat_analysis(ign_list, key, ignored_usernames=None):
         try:
             threat_analysis = player_util.get_info(ign, key)
         except Exception as err:
-            if err.args[0] == "No data":
-                print("Username " + ign + " not recognized.")
-                continue
 
-            elif err.args[0] == "Nick":
-                prev_players[ign] = "Nick"
+            if err.args[0] == "Nick or Not Player":
+                prev_players[ign] = "Nick or Not Player"
                 nicks.append(ign)
                 continue
 
             elif err.args[0] == "Repeat":
                 if ign in prev_players:
-                    if prev_players[ign] == "Nick":
+                    if prev_players[ign] == "Nick or Not Player":
                         nicks.append(ign)
                     else:
                         players[ign] = prev_players[ign]
@@ -117,7 +114,6 @@ def do_threat_analysis(ign_list, key, ignored_usernames=None):
                 continue
 
             else:
-                print(f"Unexpected {err=}, {type(err)=}")
                 raise
 
         players[ign] = threat_analysis
@@ -226,11 +222,20 @@ def main():
         with open(str(os.path.dirname(os.path.abspath(__file__))) + '/config.json', 'w') as players_file:
             players_file.write(json.dumps(config))
 
-    # Start file system watcher
     observer = Observer()
     event_handler = Handler()
-    observer.schedule(event_handler, config["screenshots_directory"])
-    observer.start()
+
+    try:
+        # Start file system watcher
+        observer.schedule(event_handler, config["screenshots_directory"])
+        observer.start()
+    except Exception as err:
+        if err.args[0] == "Invalid API key":
+            print("Invalid API Key, generate a new key with https://developer.hypixel.net/dashboard."
+                  "Then, either add the key to config.json or use the key as an argument when running the program.")
+        else:
+            print(f"Unexpected {err=}, {type(err)=}")
+            raise
 
     try:
         while True:
