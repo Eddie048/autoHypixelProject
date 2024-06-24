@@ -1,12 +1,18 @@
-import os
 import json
-import pathlib
+import os
 import sys
-from fswatch import Monitor
-from PIL import Image
+import time
 
-from image_reader import ImageReader
+from PIL import Image
+from PIL import ImageFile
+from watchdog.events import FileSystemEventHandler, FileSystemEvent
+from watchdog.observers import Observer
+
 import player_util
+from image_reader import ImageReader
+
+# Fix for images being truncated
+ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 config = {}
 
@@ -68,7 +74,7 @@ def do_threat_analysis(ign_list, key, ignored_usernames=None):
     print("\n")
 
     # open file with all previous players
-    with open(os.getcwd() + '/prev_players.json') as f:
+    with open(str(os.path.dirname(os.path.abspath(__file__))) + '/prev_players.json') as f:
         data = f.read()
 
     # reconstructing the data as a dictionary
@@ -112,7 +118,7 @@ def do_threat_analysis(ign_list, key, ignored_usernames=None):
         prev_players[ign] = threat_analysis
 
     # write back to the prev players file
-    with open(os.getcwd() + '/prev_players.json', 'w') as players_file:
+    with open(str(os.path.dirname(os.path.abspath(__file__))) + '/prev_players.json', 'w') as players_file:
         players_file.write(json.dumps(prev_players))
 
     # sort the players by the number of final kills
@@ -179,24 +185,30 @@ def get_latest_image(directory):
             continue
 
         # Get the modified time of the file
-        time = os.path.getmtime(os.path.join(directory, file))
+        creation_time = os.path.getmtime(os.path.join(directory, file))
         # If the modified time is more recent than the current latest time, update the latest time and file
-        if time > latest_time:
-            latest_time = time
+        if creation_time > latest_time:
+            latest_time = creation_time
             latest_image = file
 
     return directory + latest_image
 
 
-def callback():
-    recent_image = get_latest_image(config["screenshots_directory"])
-    username_list = get_text_from_image(recent_image)
-    do_threat_analysis(username_list, config["api_key"], config["ignored_usernames"])
+class Handler(FileSystemEventHandler):
+
+    def on_any_event(self, event: FileSystemEvent) -> None:
+        # ignore not creation events
+        if not event.event_type == 'created':
+            return
+
+        recent_image = get_latest_image(config["screenshots_directory"])
+        username_list = get_text_from_image(recent_image)
+        do_threat_analysis(username_list, config["api_key"], config["ignored_usernames"])
 
 
 def main():
     # read the config file into memory
-    with open(str(pathlib.Path().absolute()) + '/config.json') as f:
+    with open(str(os.path.dirname(os.path.abspath(__file__))) + '/config.json') as f:
         data = f.read()
 
     global config
@@ -205,14 +217,21 @@ def main():
     if len(sys.argv) == 2:
         config["api_key"] = sys.argv[1]
         # write back to the prev players file
-        with open(os.getcwd() + '/config.json', 'w') as players_file:
+        with open(str(os.path.dirname(os.path.abspath(__file__))) + '/config.json', 'w') as players_file:
             players_file.write(json.dumps(config))
 
-    monitor = Monitor()
-    monitor.add_path(config["screenshots_directory"])
+    # Start file system watcher
+    observer = Observer()
+    event_handler = Handler()
+    observer.schedule(event_handler, config["screenshots_directory"])
+    observer.start()
 
-    monitor.set_callback(callback)
-    monitor.start()
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        observer.stop()
+    observer.join()
 
 
 if __name__ == "__main__":

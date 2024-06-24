@@ -7,7 +7,7 @@ class ImageReader:
     def __init__(self):
         # reading the key from a file
         self.char_code = None
-        with open(os.getcwd() + 'char_code.json') as f:
+        with open(str(os.path.dirname(os.path.abspath(__file__))) + '/char_code.json') as f:
             data = f.read()
 
         # reconstructing the data as a dictionary
