@@ -96,10 +96,12 @@ def do_threat_analysis(ign_list, key, ignored_usernames=None):
             if err.args[0] == "No data":
                 print("Username " + ign + " not recognized.")
                 continue
+
             elif err.args[0] == "Nick":
                 prev_players[ign] = "Nick"
                 nicks.append(ign)
                 continue
+
             elif err.args[0] == "Repeat":
                 if ign in prev_players:
                     if prev_players[ign] == "Nick":
@@ -108,8 +110,12 @@ def do_threat_analysis(ign_list, key, ignored_usernames=None):
                         players[ign] = prev_players[ign]
                 else:
                     print("Warning: Player " + ign + " currently on cooldown.")
-
                 continue
+
+            elif err.args[0] == "New Player":
+                print(ign + " is a new player.")
+                continue
+
             else:
                 print(f"Unexpected {err=}, {type(err)=}")
                 raise
