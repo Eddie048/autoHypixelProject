@@ -3,15 +3,11 @@ import os
 import sys
 import time
 
-from PIL import ImageFile
 from watchdog.events import FileSystemEventHandler, FileSystemEvent
 from watchdog.observers import Observer
 
 import player_util
 from image_reader import ImageReader
-
-# Fix for images being truncated
-ImageFile.LOAD_TRUNCATED_IMAGES = True
 
 config = {}
 image_reader: ImageReader
@@ -163,8 +159,22 @@ class Handler(FileSystemEventHandler):
         if not event.event_type == 'created':
             return
 
+        # Get image
         recent_image = get_latest_image(config["screenshots_directory"])
-        username_list = image_reader.get_text_from_image(recent_image)
+
+        # Wait until image is fully loaded
+        limit = 20
+        while True:
+            try:
+                username_list = image_reader.get_text_from_image(recent_image)
+                break
+            except OSError:
+                if limit <= 0:
+                    print("Screenshot image failed to load")
+                    return
+                else:
+                    limit = limit - 1
+
         do_threat_analysis(username_list, config["api_key"], config["ignored_usernames"])
 
 
