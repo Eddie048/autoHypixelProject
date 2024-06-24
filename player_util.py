@@ -15,16 +15,21 @@ def get_info(player_name, key):
 
     # check for error conditions
     if raw_data is None:
-        # Player not recognized
-        raise Exception("No data")
+        # API Problem
+        raise Exception("Unexpected API Issue")
 
     if not raw_data["success"]:
-        # This means the player's data was accessed too recently and cannot be accessed again
-        raise Exception("Repeat")
 
-    if raw_data['player'] == "None" or raw_data['player'] is None:
-        # This means the player is a nicked player
-        raise Exception("Nick")
+        if raw_data["cause"] == "Invalid API key":
+            raise Exception("Invalid API key")
+        elif raw_data["cause"] == "You have already looked up this name recently":
+            raise Exception("Repeat")
+        else:
+            raise Exception("Unexpected exception: " + raw_data["cause"])
+
+    if raw_data['player'] is None:
+        # This means the player is unrecognized, either nicked or not a player
+        raise Exception("Nick or Not Player")
 
     # set raw data to just the bedwars data
     try:
