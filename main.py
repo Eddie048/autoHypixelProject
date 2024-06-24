@@ -209,33 +209,43 @@ class Handler(FileSystemEventHandler):
 
 
 def main():
-    data = None
     # Ensure confiig file exists, read the config file into memory
+    global config
     try:
         with open(str(os.path.dirname(os.path.abspath(__file__))) + '/config.json') as f:
-            data = f.read()
+            config = json.loads(f.read())
     except FileNotFoundError:
         print("config.json file not found. Create a config.json file to continue")
 
-    global config
-    config = json.loads(data)
-
+    # Check for new API Key passed in as system argument
     if len(sys.argv) == 2:
         config["api_key"] = sys.argv[1]
-        # write back to the prev players file
+        # Write new key back to the config file
         with open(str(os.path.dirname(os.path.abspath(__file__))) + '/config.json', 'w') as players_file:
             players_file.write(json.dumps(config))
 
+    # Check to ensure API Key works
+    try:
+        player_util.api_request("t", config["api_key"])
+    except Exception as err:
+        if err.args[0] == "Invalid API key":
+            print("Invalid API Key, generate a new key with 'https://developer.hypixel.net/dashboard'."
+                  "Then, either add the key to config.json or use the key as an argument when running the program.")
+            return
+        elif "Unexpected exception" in err.args[0]:
+            print(err.args[0])
+            return
+    print("API Key Validated")
+
+    # Start file system watcher
     observer = Observer()
     event_handler = Handler()
-
     try:
-        # Start file system watcher
         observer.schedule(event_handler, config["screenshots_directory"])
         observer.start()
     except Exception as err:
         if err.args[0] == "Invalid API key":
-            print("Invalid API Key, generate a new key with https://developer.hypixel.net/dashboard."
+            print("Invalid API Key, generate a new key with 'https://developer.hypixel.net/dashboard'."
                   "Then, either add the key to config.json or use the key as an argument when running the program.")
         else:
             print(f"Unexpected {err=}, {type(err)=}")
