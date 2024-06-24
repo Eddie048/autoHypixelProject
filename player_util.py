@@ -1,10 +1,8 @@
 import requests
 
 
-# take in player ign and key and returns a dictionary with just useful information about them
-def get_info(player_name, key):
-    player_data = {}
-
+# Take in player ign and key and gets player's data from the API
+def api_request(player_name, key):
     raw_data = requests.get(
         url="https://api.hypixel.net/player",
         params={
@@ -37,30 +35,33 @@ def get_info(player_name, key):
     except KeyError:
         raise Exception("New Player")
 
-    # Get finals data
-    player_data["Finals"] = raw_data["final_kills_bedwars"] if "final_kills_bedwars" in raw_data else 0
+    return raw_data
 
-    # Get beds data
-    player_data["Beds"] = raw_data["beds_broken_bedwars"] if "beds_broken_bedwars" in raw_data else 0
+
+# Takes in player's name and API key, returns dictionary wih the player's stats
+def get_player_info(player_name, key):
+    player_json = api_request(player_name, key)
+
+    # Initialize player_data with finals, beds, and winstreak data
+    player_data = {"Finals": player_json["final_kills_bedwars"] if "final_kills_bedwars" in player_json else 0,
+                   "Beds": player_json["beds_broken_bedwars"] if "beds_broken_bedwars" in player_json else 0,
+                   "Winstreak": player_json["winstreak"] if "winstreak" in player_json else 0}
 
     # Get fkdr data
-    if "final_deaths_bedwars" not in raw_data or raw_data["final_deaths_bedwars"] == 0:
+    if "final_deaths_bedwars" not in player_json or player_json["final_deaths_bedwars"] == 0:
         player_data["FKDR"] = 0
     else:
-        player_data["FKDR"] = round(10 * player_data["Finals"] / raw_data["final_deaths_bedwars"]) / 10
-
-    # Get winstreak data
-    player_data["Winstreak"] = raw_data["winstreak"] if "winstreak" in raw_data else 0
+        player_data["FKDR"] = round(10 * player_data["Finals"] / player_json["final_deaths_bedwars"]) / 10
 
     # Get max gamemode winstreak data
     gamemodes = ["four_four_", "eight_two_", "eight_one_", "four_three_"]
     max_winstreak = 0
     for mode in gamemodes:
-        max_winstreak = max(max_winstreak, raw_data[mode + "winstreak"] if mode + "winstreak" in raw_data else 0)
+        max_winstreak = max(max_winstreak, player_json[mode + "winstreak"] if mode + "winstreak" in player_json else 0)
     player_data["Max Winstreak"] = max_winstreak
 
     try:
-        raw_data = raw_data["practice"]["records"]
+        raw_data = player_json["practice"]["records"]
     except KeyError:
         player_data["Bridge Rating"] = 0
         return player_data

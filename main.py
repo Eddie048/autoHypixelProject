@@ -91,7 +91,7 @@ def do_threat_analysis(ign_list, key, ignored_usernames=None):
             continue
 
         try:
-            threat_analysis = player_util.get_info(ign, key)
+            threat_analysis = player_util.get_player_info(ign, key)
         except Exception as err:
 
             if err.args[0] == "Nick or Not Player":
