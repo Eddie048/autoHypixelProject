@@ -87,7 +87,7 @@ def do_threat_analysis(ign_list, key, ignored_usernames=None):
 
     for ign in ign_list:
         # ignore usernames in ignored list
-        if ignored_usernames.__contains__(ign.lower()):
+        if ign.lower() in (player_name.lower() for player_name in ignored_usernames):
             continue
 
         try:
