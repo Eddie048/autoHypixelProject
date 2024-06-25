@@ -11,7 +11,7 @@ To Use:
 3. Change the default values in `config.json` .
    1. Create an API Key at https://developer.hypixel.net and add to the "api-key" field.
    2. Find your minecraft screenshots directory and add the full path to the "screenshots-directory" field. Note that your computer's screenshots and minecraft screenshots are saved to different places.
-   3. Find your pixel_scale value, which is the number of pixels on your screen a pixel of minecraft text takes up. The easiest way to find this is take a screenshot of text in minecraft and count the width of a pixel in an image editor on your computer. Place this value in the "pixel_size" field.
+   3. Find your pixel_size value, which is the number of pixels on your screen a pixel of minecraft text takes up. The easiest way to find this is take a screenshot of text in minecraft and count the width of a pixel in an image editor on your computer. Place this value in the "pixel_size" field.
    4. Add your username and any other usernames you want the tracker to ignore to the "ignored-usernames" field. This is just so you don't have your own data cluttering up the view, but it isn't necessary.
 4. Run the program from `main.py`.
 5. Join a bedwars lobby on hypixel.net.
