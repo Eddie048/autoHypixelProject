@@ -8,24 +8,32 @@ class ImageReader:
     # takes in an image, returns a list of the lines of text in the image
     def get_text_from_image(self, img_str):
         img = Image.open(img_str)
-        img = img.crop((520, 60, 520 + 400, 60 + 27 * 16))
-        # default scale factor, number of pixels per minecraft pixel
-        # scale_factor = 6 if RETINA_DISPLAY else 3
-        scale_factor = 3
+
+        # Pixel_size is the number of screen pixels that one minecraft pixel takes up, depends on GUI scale
+        pixel_size = 3
+
+        # Calculate size of box of usernames in tab menu
+        max_width = (8 + 1 + 8 + 16 * (1 + 5) + 3 + 10 + 1) * pixel_size
+        max_height = (16 * (8 + 1) - 1) * pixel_size
+        x_offset = int(img.width / 2 - max_width / 2)
+        y_offset = 20 * pixel_size
+
+        # Crop screenshot to be just player usernames
+        img = img.crop((x_offset, y_offset, x_offset + max_width, y_offset + max_height))
 
         ign_return_list = []
 
         # repeats 16 times as that is the maximum number of players in a lobby
         for x in range(16):
-            temp_img = img.crop(box=(0, 9 * scale_factor * x, img.width, 9 * scale_factor * (x + 1) - scale_factor))
+            temp_img = img.crop(box=(0, 9 * pixel_size * x, img.width, 9 * pixel_size * (x + 1) - pixel_size))
 
             arr = []
 
-            for i in range(int(temp_img.width / scale_factor)):
+            for i in range(int(temp_img.width / pixel_size)):
                 arr.append([])
-                for k in range(int(temp_img.height / scale_factor)):
+                for k in range(int(temp_img.height / pixel_size)):
                     # plus ones move to the center roughly
-                    px = temp_img.getpixel(xy=(i * scale_factor + 1, k * scale_factor + 1))
+                    px = temp_img.getpixel(xy=(i * pixel_size + 1, k * pixel_size + 1))
 
                     # the 4 rank colors, all of which may appear in tab
                     acceptable_colors = [(255, 170, 0), (85, 255, 255), (85, 255, 85), (170, 170, 170)]
