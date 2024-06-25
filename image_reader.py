@@ -6,11 +6,8 @@ from PIL import Image
 class ImageReader:
 
     # takes in an image, returns a list of the lines of text in the image
-    def get_text_from_image(self, img_str):
+    def get_text_from_image(self, img_str, pixel_size):
         img = Image.open(img_str)
-
-        # Pixel_size is the number of screen pixels that one minecraft pixel takes up, depends on GUI scale
-        pixel_size = 3
 
         # Calculate size of box of usernames in tab menu
         max_width = (8 + 1 + 8 + 16 * (1 + 5) + 3 + 10 + 1) * pixel_size

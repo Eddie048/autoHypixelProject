@@ -166,7 +166,7 @@ class Handler(FileSystemEventHandler):
         limit = 20
         while True:
             try:
-                username_list = image_reader.get_text_from_image(recent_image)
+                username_list = image_reader.get_text_from_image(recent_image, config["pixel_size"])
                 break
             except OSError:
                 if limit <= 0:
