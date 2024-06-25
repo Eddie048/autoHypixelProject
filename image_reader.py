@@ -20,7 +20,7 @@ class ImageReader:
 
         ign_return_list = []
 
-        # repeats 16 times as that is the maximum number of players in a lobby
+        # Repeat 16 times as that is the maximum number of players in a lobby
         for x in range(16):
             temp_img = img.crop(box=(0, 9 * pixel_size * x, img.width, 9 * pixel_size * (x + 1) - pixel_size))
 
@@ -29,22 +29,25 @@ class ImageReader:
             for i in range(int(temp_img.width / pixel_size)):
                 arr.append([])
                 for k in range(int(temp_img.height / pixel_size)):
-                    # plus ones move to the center roughly
+                    # Check the center of each pixel, shouldn't matter but extra safety measure
                     px = temp_img.getpixel(xy=(i * pixel_size + 1, k * pixel_size + 1))
 
-                    # the 4 rank colors, all of which may appear in tab
+                    # The 4 rank colors, all of which may appear in tab
                     acceptable_colors = [(255, 170, 0), (85, 255, 255), (85, 255, 85), (170, 170, 170)]
 
-                    # if the given pixel is one of these colors, it is part of a character
+                    # Ff the given pixel is one of these colors, it is part of a character
                     if acceptable_colors.__contains__(px):
                         arr[i].append(1)
                     else:
                         arr[i].append(0)
 
-            # strings of length 0 aren't usernames
+            # Add username to list if it isn't length 0
             temp_ign = self.read_string(arr)
             if len(temp_ign) > 0:
                 ign_return_list.append(temp_ign)
+            else:
+                # If there was no username here, there won't be any below this
+                break
 
         return ign_return_list
 
